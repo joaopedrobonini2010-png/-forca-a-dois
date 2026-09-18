@@ -1,0 +1,677 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Forca a dois</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Nunito+Sans:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F3F6FB;
+  --grid:#DCE5F3;
+  --ink:#1E2A5A;
+  --ink-soft:#4F5C8C;
+  --pink:#D12A66;
+  --on-pink:#FFFFFF;
+  --margin:rgba(209,42,102,.35);
+  --hl:#FFE985;
+  --on-hl:#1E2A5A;
+  --field:#FFFFFF;
+  --focus:#2B6BFF;
+  --hand:"Caveat","Segoe Print","Bradley Hand",cursive;
+  --sans:"Nunito Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#151B38;
+    --grid:#212A55;
+    --ink:#E8EDFF;
+    --ink-soft:#A3AEDB;
+    --pink:#FF7FA6;
+    --on-pink:#1A1030;
+    --margin:rgba(255,127,166,.35);
+    --hl:#5B4B10;
+    --on-hl:#FFF3B8;
+    --field:#1D2550;
+    --focus:#9DB8FF;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#151B38;
+  --grid:#212A55;
+  --ink:#E8EDFF;
+  --ink-soft:#A3AEDB;
+  --pink:#FF7FA6;
+  --on-pink:#1A1030;
+  --margin:rgba(255,127,166,.35);
+  --hl:#5B4B10;
+  --on-hl:#FFF3B8;
+  --field:#1D2550;
+  --focus:#9DB8FF;
+}
+
+*{box-sizing:border-box}
+[hidden]{display:none !important}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  min-height:100vh;
+  background-color:var(--paper);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size:28px 28px;
+  color:var(--ink);
+  font-family:var(--sans);
+  font-size:1.0625rem;
+  line-height:1.5;
+}
+main{
+  position:relative;
+  max-width:34rem;
+  min-height:100vh;
+  margin:0 auto;
+  padding:1.5rem 1.25rem 3rem 2.4rem;
+}
+main::before{
+  content:"";
+  position:absolute;
+  top:0;bottom:0;left:1rem;
+  width:2px;
+  background:var(--margin);
+  pointer-events:none;
+}
+
+h1,h2{
+  font-family:var(--hand);
+  font-weight:700;
+  line-height:1;
+  margin:0 0 .6rem;
+  letter-spacing:.01em;
+}
+h1{font-size:clamp(3.4rem,15vw,5rem);transform:rotate(-1.5deg);transform-origin:left center}
+h2{font-size:clamp(2.3rem,9vw,3rem)}
+h1:focus,h2:focus{outline:none}
+p{margin:.4rem 0}
+.lead{font-size:1.15rem;max-width:30rem}
+.muted{color:var(--ink-soft)}
+
+ol.steps{
+  margin:1.4rem 0 1.8rem;
+  padding:0 0 0 1.3rem;
+}
+ol.steps li{margin:.5rem 0;padding-left:.3rem}
+ol.steps li::marker{font-family:var(--hand);font-weight:700;font-size:1.5rem;color:var(--pink)}
+
+.actions{display:flex;flex-direction:column;gap:.9rem;margin-top:1.4rem}
+.actions.row{flex-direction:row;flex-wrap:wrap}
+
+.btn{
+  font:800 1.05rem var(--sans);
+  min-height:3rem;
+  padding:.6rem 1.3rem;
+  border:2.5px solid var(--ink);
+  border-radius:14px 10px 13px 9px / 10px 13px 9px 12px;
+  background:transparent;
+  color:var(--ink);
+  cursor:pointer;
+  text-align:center;
+}
+.btn.primary{
+  background:var(--pink);
+  color:var(--on-pink);
+  box-shadow:3px 3px 0 var(--ink);
+}
+.btn:active{transform:translate(2px,2px)}
+.btn.primary:active{box-shadow:1px 1px 0 var(--ink)}
+.btn.quiet{
+  border-color:transparent;
+  min-height:2.5rem;
+  padding:.3rem .2rem;
+  color:var(--ink-soft);
+  text-decoration:underline;
+  text-underline-offset:3px;
+}
+.btn:focus-visible,.key:focus-visible,input:focus-visible{
+  outline:3px solid var(--focus);
+  outline-offset:3px;
+}
+
+label{display:block;font-weight:800;margin:1.3rem 0 .4rem}
+input{
+  width:100%;
+  font:600 1.1rem var(--sans);
+  padding:.7rem .85rem;
+  color:var(--ink);
+  background:var(--field);
+  border:2.5px solid var(--ink);
+  border-radius:12px 9px 11px 8px / 9px 11px 8px 10px;
+}
+input::placeholder{color:var(--ink-soft);opacity:.75}
+.help{font-size:.92rem;color:var(--ink-soft);margin:.35rem 0 0}
+.err{
+  min-height:1.5rem;
+  margin:.9rem 0 0;
+  font-weight:700;
+  color:var(--pink);
+}
+
+.codebox{
+  margin-top:1.6rem;
+  padding-top:1.2rem;
+  border-top:2.5px dashed var(--ink);
+}
+.codebox input{font-family:ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;font-size:1rem;margin-top:.7rem}
+
+/* Jogo */
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:.75rem;min-height:2.5rem}
+.hint{
+  display:inline-block;
+  background:var(--hl);
+  color:var(--on-hl);
+  padding:.25rem .75rem;
+  border-radius:6px;
+  font-weight:700;
+  transform:rotate(-1deg);
+  max-width:100%;
+  overflow-wrap:anywhere;
+}
+#gallows{
+  display:block;
+  width:100%;
+  max-width:240px;
+  height:auto;
+  margin:.6rem auto 0;
+  overflow:visible;
+}
+.pen path{stroke:var(--ink);stroke-width:4;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.marker .part{
+  stroke:var(--pink);
+  stroke-width:5.5;
+  fill:none;
+  stroke-linecap:round;
+  stroke-dasharray:1 1;
+  stroke-dashoffset:1;
+  opacity:0;
+}
+.marker .part.on{
+  opacity:1;
+  stroke-dashoffset:0;
+  transition:stroke-dashoffset .45s ease-out;
+}
+.eyes{stroke:var(--pink);stroke-width:2.6;fill:none;stroke-linecap:round;opacity:0}
+.eyes.show{opacity:1}
+
+.word{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:.9rem 1.7rem;
+  margin:1.2rem 0 .8rem;
+}
+.wordgroup{display:flex;flex-wrap:wrap;justify-content:center;gap:.3rem}
+.slot{
+  width:1.9rem;
+  height:3.1rem;
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  padding-bottom:.05rem;
+  border-bottom:3px solid var(--ink);
+  font:700 2.5rem/1 var(--hand);
+}
+.slot.dash{border-bottom-color:transparent;width:1.1rem}
+.slot.missed{color:var(--pink)}
+.word.win .slot{background:linear-gradient(transparent 52%, var(--hl) 52%)}
+
+.status{
+  display:flex;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:.25rem 1rem;
+  font-weight:700;
+  min-height:1.6rem;
+}
+
+.kb{display:flex;flex-direction:column;gap:6px;margin-top:1.1rem}
+.kb-row{display:flex;justify-content:center;gap:4px}
+.key{
+  flex:1 1 0;
+  max-width:44px;
+  min-width:0;
+  height:48px;
+  padding:0;
+  font:800 1rem var(--sans);
+  color:var(--ink);
+  background:var(--field);
+  border:2px solid var(--ink);
+  border-radius:9px 7px 9px 6px / 7px 9px 6px 9px;
+  cursor:pointer;
+}
+.key:active:not(:disabled){transform:translate(1px,1px)}
+.key:disabled{cursor:default}
+.key.hit{background:var(--pink);color:var(--on-pink)}
+.key.miss{opacity:.4;text-decoration:line-through}
+
+.result{margin-top:1.4rem;text-align:center}
+.result .actions{align-items:stretch;text-align:center}
+.result p{font-size:1.15rem}
+
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+@media (prefers-reduced-motion: reduce){
+  .marker .part.on{transition:none}
+  .btn:active,.key:active{transform:none}
+}
+@media (max-width:380px){
+  main{padding-right:.9rem}
+  .slot{width:1.6rem;font-size:2.2rem}
+}
+</style>
+</head>
+<body>
+<main>
+
+  <!-- Início -->
+  <section id="home" class="screen">
+    <h1 tabindex="-1">Forca a dois</h1>
+    <p class="lead">Uma pessoa escolhe a palavra, a outra tenta adivinhar. Funciona no celular e no computador.</p>
+    <ol class="steps">
+      <li>Crie uma palavra e gere o código.</li>
+      <li>Mande o código para a outra pessoa por onde preferir.</li>
+      <li>Ela cola o código aqui e começa a jogar.</li>
+    </ol>
+    <div class="actions">
+      <button class="btn primary" id="goCreate" type="button">Criar uma palavra</button>
+      <button class="btn" id="goJoin" type="button">Colar um código</button>
+    </div>
+  </section>
+
+  <!-- Criar -->
+  <section id="create" class="screen" hidden>
+    <button class="btn quiet" data-back type="button">Voltar</button>
+    <h2 tabindex="-1">Escolha a palavra</h2>
+    <label for="wordInput">Palavra ou frase</label>
+    <input id="wordInput" type="text" maxlength="30" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ex.: Paraty" aria-describedby="wordHelp">
+    <p class="help" id="wordHelp">Letras, espaços e hífen. Até 30 caracteres.</p>
+    <label for="hintInput">Dica (opcional)</label>
+    <input id="hintInput" type="text" maxlength="60" autocomplete="off" placeholder="Ex.: lugar da nossa viagem">
+    <p class="err" id="createErr" role="alert"></p>
+    <div class="actions">
+      <button class="btn primary" id="makeBtn" type="button">Gerar código</button>
+    </div>
+
+    <div class="codebox" id="codeBox" hidden>
+      <p><strong>Código pronto.</strong> Mande para quem vai adivinhar.</p>
+      <input id="codeOut" type="text" readonly aria-label="Código do desafio">
+      <div class="actions row">
+        <button class="btn primary" id="copyBtn" type="button">Copiar código</button>
+        <button class="btn" id="playHereBtn" type="button">Jogar neste aparelho</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Colar código -->
+  <section id="join" class="screen" hidden>
+    <button class="btn quiet" data-back type="button">Voltar</button>
+    <h2 tabindex="-1">Cole o código</h2>
+    <p>Cole aqui o código que a outra pessoa mandou.</p>
+    <label for="codeInput">Código do desafio</label>
+    <input id="codeInput" type="text" autocomplete="off" autocapitalize="off" spellcheck="false">
+    <p class="err" id="joinErr" role="alert"></p>
+    <div class="actions">
+      <button class="btn primary" id="startBtn" type="button">Começar a jogar</button>
+    </div>
+  </section>
+
+  <!-- Jogo -->
+  <section id="play" class="screen" hidden>
+    <div class="topbar">
+      <button class="btn quiet" data-back type="button">Sair</button>
+      <span class="hint" id="hint" hidden></span>
+    </div>
+
+    <svg id="gallows" viewBox="0 0 200 215" role="img" aria-label="Desenho da forca">
+      <g class="pen">
+        <path d="M18 204 Q70 207 128 203"/>
+        <path d="M52 204 L50 20"/>
+        <path d="M48 22 Q95 18 138 21"/>
+        <path d="M51 56 L84 22"/>
+        <path d="M134 21 L133 47"/>
+      </g>
+      <g class="marker">
+        <circle class="part" pathLength="1" cx="133" cy="63" r="16"/>
+        <path class="part" pathLength="1" d="M133 79 L132 133"/>
+        <path class="part" pathLength="1" d="M132 93 L109 114"/>
+        <path class="part" pathLength="1" d="M132 93 L157 113"/>
+        <path class="part" pathLength="1" d="M132 133 L113 168"/>
+        <path class="part" pathLength="1" d="M132 133 L152 167"/>
+        <path class="eyes" id="eyes" d="M125 58 l5 5 m0 -5 l-5 5 M136 58 l5 5 m0 -5 l-5 5"/>
+      </g>
+    </svg>
+
+    <div class="word" id="word" role="group"></div>
+
+    <div class="status">
+      <span id="errCount"></span>
+      <span id="wrongList"></span>
+    </div>
+
+    <div class="kb" id="kb"></div>
+
+    <div class="result" id="result" hidden>
+      <h2 id="resultTitle" tabindex="-1"></h2>
+      <p id="resultText"></p>
+      <div class="actions">
+        <button class="btn primary" id="againCreate" type="button">Criar uma palavra para a outra pessoa</button>
+        <button class="btn" id="againJoin" type="button">Colar outro código</button>
+      </div>
+    </div>
+
+    <div class="sr" id="live" aria-live="polite"></div>
+  </section>
+
+</main>
+
+<script>
+(function(){
+'use strict';
+
+// <pure>
+var MAX_ERRORS = 6;
+var KEY = [97,109,111,114,50,48,50,54];
+
+function norm(s){
+  return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase();
+}
+
+function validateWord(raw){
+  var w = raw.normalize('NFC').trim().replace(/\s+/g,' ');
+  if (w.length < 2 || w.length > 30) return null;
+  var letters = 0;
+  for (var ch of w){
+    var b = norm(ch);
+    if (b.length !== 1) return null;
+    if (/[A-Z]/.test(b)) letters++;
+    else if (b !== ' ' && b !== '-') return null;
+  }
+  if (letters < 2) return null;
+  if (/^[\- ]|[\- ]$|[\- ]{2}/.test(w)) return null;
+  return w;
+}
+
+function encode(word, hint){
+  var clean = (hint || '').replace(/\|/g,' ').trim().slice(0,60);
+  var bytes = new TextEncoder().encode(word + '|' + clean);
+  var bin = '';
+  for (var i = 0; i < bytes.length; i++){
+    bin += String.fromCharCode(bytes[i] ^ KEY[i % KEY.length]);
+  }
+  return btoa(bin).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+
+function decode(code){
+  try{
+    var s = code.replace(/[^A-Za-z0-9_-]/g,'').replace(/-/g,'+').replace(/_/g,'/');
+    if (!s) return null;
+    while (s.length % 4) s += '=';
+    var bin = atob(s);
+    var bytes = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++){
+      bytes[i] = bin.charCodeAt(i) ^ KEY[i % KEY.length];
+    }
+    var text = new TextDecoder('utf-8',{fatal:true}).decode(bytes);
+    var cut = text.indexOf('|');
+    if (cut < 0) return null;
+    var word = validateWord(text.slice(0,cut));
+    if (!word) return null;
+    return { word: word, hint: text.slice(cut + 1).trim().slice(0,60) };
+  }catch(e){
+    return null;
+  }
+}
+// </pure>
+
+function $(s){ return document.querySelector(s); }
+var screens = { home:$('#home'), create:$('#create'), join:$('#join'), play:$('#play') };
+var current = 'home';
+var game = null;
+
+function show(name, focusHeading){
+  for (var k in screens) screens[k].hidden = (k !== name);
+  current = name;
+  window.scrollTo(0,0);
+  if (focusHeading !== false){
+    var h = screens[name].querySelector('h1,h2');
+    if (h && !h.closest('[hidden]')) h.focus({preventScroll:true});
+  }
+}
+
+/* ---------- Criar ---------- */
+var wordInput = $('#wordInput'), hintInput = $('#hintInput');
+var createErr = $('#createErr'), codeBox = $('#codeBox'), codeOut = $('#codeOut');
+var pending = null;
+
+function resetCreate(){
+  wordInput.value = '';
+  hintInput.value = '';
+  createErr.textContent = '';
+  codeBox.hidden = true;
+  pending = null;
+}
+
+function makeCode(){
+  var word = validateWord(wordInput.value);
+  if (!word){
+    createErr.textContent = 'Use só letras, espaços e hífen. São no mínimo 2 letras e no máximo 30 caracteres.';
+    codeBox.hidden = true;
+    wordInput.focus();
+    return;
+  }
+  createErr.textContent = '';
+  var hint = hintInput.value.replace(/\|/g,' ').trim().slice(0,60);
+  pending = { word: word, hint: hint };
+  codeOut.value = encode(word, hint);
+  codeBox.hidden = false;
+  $('#copyBtn').textContent = 'Copiar código';
+  codeOut.focus();
+  codeOut.select();
+}
+
+function invalidateCode(){
+  if (!codeBox.hidden){ codeBox.hidden = true; pending = null; }
+  createErr.textContent = '';
+}
+
+async function copyCode(){
+  var btn = $('#copyBtn');
+  var ok = false;
+  try{
+    await navigator.clipboard.writeText(codeOut.value);
+    ok = true;
+  }catch(e){}
+  if (!ok){
+    try{
+      codeOut.focus();
+      codeOut.select();
+      codeOut.setSelectionRange(0, codeOut.value.length);
+      ok = document.execCommand('copy');
+    }catch(e){}
+  }
+  btn.textContent = ok ? 'Copiado!' : 'Selecione o código e copie';
+  setTimeout(function(){ btn.textContent = 'Copiar código'; }, 2400);
+}
+
+/* ---------- Colar código ---------- */
+var codeInput = $('#codeInput'), joinErr = $('#joinErr');
+
+function startFromCode(){
+  var data = decode(codeInput.value);
+  if (!data){
+    joinErr.textContent = 'Esse código não parece válido. Confira se ele foi copiado inteiro.';
+    codeInput.focus();
+    return;
+  }
+  joinErr.textContent = '';
+  codeInput.value = '';
+  startGame(data.word, data.hint);
+}
+
+/* ---------- Jogo ---------- */
+var ROWS = ['QWERTYUIOP','ASDFGHJKL','ZXCVBNM'];
+
+function buildKeyboard(){
+  var kb = $('#kb');
+  kb.textContent = '';
+  ROWS.forEach(function(row){
+    var r = document.createElement('div');
+    r.className = 'kb-row';
+    row.split('').forEach(function(l){
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'key';
+      b.dataset.l = l;
+      b.textContent = l;
+      b.setAttribute('aria-label','Letra ' + l);
+      b.addEventListener('click', function(){ guess(l); });
+      r.appendChild(b);
+    });
+    kb.appendChild(r);
+  });
+}
+
+function startGame(word, hint){
+  var chars = [];
+  for (var ch of word){
+    var b = norm(ch);
+    chars.push({ ch: ch.toUpperCase(), base: b, letter: /[A-Z]/.test(b) });
+  }
+  game = { chars: chars, hint: hint, guessed: new Set(), wrong: [], over: false, won: false, word: word.toUpperCase() };
+  buildKeyboard();
+  $('#live').textContent = '';
+  show('play', false);
+  render();
+}
+
+function guess(letter){
+  if (!game || game.over || game.guessed.has(letter)) return;
+  game.guessed.add(letter);
+  var hit = game.chars.some(function(c){ return c.base === letter; });
+  if (!hit) game.wrong.push(letter);
+  var complete = game.chars.every(function(c){ return !c.letter || game.guessed.has(c.base); });
+  var msg;
+  if (complete){
+    game.over = true; game.won = true;
+    msg = 'Acertou! A palavra era ' + game.word + '.';
+  } else if (game.wrong.length >= MAX_ERRORS){
+    game.over = true; game.won = false;
+    msg = 'Não foi dessa vez. A palavra era ' + game.word + '.';
+  } else {
+    msg = 'Letra ' + letter + (hit ? ': tem na palavra.' : ': não tem. ' + game.wrong.length + ' de ' + MAX_ERRORS + ' erros.');
+  }
+  $('#live').textContent = msg;
+  render();
+  if (game.over) $('#resultTitle').focus({preventScroll:true});
+}
+
+function render(){
+  // dica
+  var hint = $('#hint');
+  if (game.hint){ hint.textContent = 'Dica: ' + game.hint; hint.hidden = false; }
+  else { hint.hidden = true; }
+
+  // desenho
+  var parts = document.querySelectorAll('#gallows .part');
+  parts.forEach(function(p, i){ p.classList.toggle('on', i < game.wrong.length); });
+  $('#eyes').classList.toggle('show', game.over && !game.won);
+
+  // palavra
+  var wrap = $('#word');
+  wrap.textContent = '';
+  var group = null;
+  var spoken = [];
+  function flush(){ if (group){ wrap.appendChild(group); group = null; } }
+  game.chars.forEach(function(c){
+    if (c.ch === ' '){ flush(); spoken.push('espaço'); return; }
+    if (!group){ group = document.createElement('span'); group.className = 'wordgroup'; }
+    var s = document.createElement('span');
+    s.className = 'slot';
+    if (!c.letter){
+      s.classList.add('dash'); s.textContent = c.ch; spoken.push('hífen');
+    } else if (game.guessed.has(c.base)){
+      s.textContent = c.ch; spoken.push(c.ch);
+    } else if (game.over && !game.won){
+      s.textContent = c.ch; s.classList.add('missed'); spoken.push(c.ch);
+    } else {
+      spoken.push('lacuna');
+    }
+    group.appendChild(s);
+  });
+  flush();
+  wrap.classList.toggle('win', game.over && game.won);
+  wrap.setAttribute('aria-label', 'Palavra: ' + spoken.join(', '));
+
+  // status
+  $('#errCount').textContent = 'Erros: ' + game.wrong.length + ' de ' + MAX_ERRORS;
+  $('#wrongList').textContent = game.wrong.length ? 'Erradas: ' + game.wrong.join(', ') : '';
+
+  // teclado
+  document.querySelectorAll('.key').forEach(function(k){
+    var l = k.dataset.l;
+    var used = game.guessed.has(l);
+    var inWord = game.chars.some(function(c){ return c.base === l; });
+    k.disabled = used || game.over;
+    k.classList.toggle('hit', used && inWord);
+    k.classList.toggle('miss', used && !inWord);
+  });
+  $('#kb').hidden = game.over;
+
+  // resultado
+  var result = $('#result');
+  result.hidden = !game.over;
+  if (game.over){
+    $('#resultTitle').textContent = game.won ? 'Acertou!' : 'Não foi dessa vez.';
+    $('#resultText').textContent = 'A palavra era ' + game.word + '.';
+  }
+}
+
+/* ---------- Eventos ---------- */
+$('#goCreate').addEventListener('click', function(){ resetCreate(); show('create'); wordInput.focus(); });
+$('#goJoin').addEventListener('click', function(){ joinErr.textContent = ''; show('join'); codeInput.focus(); });
+document.querySelectorAll('[data-back]').forEach(function(b){
+  b.addEventListener('click', function(){ game = null; show('home'); });
+});
+
+$('#makeBtn').addEventListener('click', makeCode);
+wordInput.addEventListener('keydown', function(e){ if (e.key === 'Enter') makeCode(); });
+hintInput.addEventListener('keydown', function(e){ if (e.key === 'Enter') makeCode(); });
+wordInput.addEventListener('input', invalidateCode);
+hintInput.addEventListener('input', invalidateCode);
+$('#copyBtn').addEventListener('click', copyCode);
+codeOut.addEventListener('focus', function(){ codeOut.select(); });
+$('#playHereBtn').addEventListener('click', function(){
+  if (pending) startGame(pending.word, pending.hint);
+});
+
+$('#startBtn').addEventListener('click', startFromCode);
+codeInput.addEventListener('keydown', function(e){ if (e.key === 'Enter') startFromCode(); });
+codeInput.addEventListener('input', function(){ joinErr.textContent = ''; });
+
+$('#againCreate').addEventListener('click', function(){ game = null; resetCreate(); show('create'); wordInput.focus(); });
+$('#againJoin').addEventListener('click', function(){ game = null; joinErr.textContent = ''; show('join'); codeInput.focus(); });
+
+document.addEventListener('keydown', function(e){
+  if (current !== 'play' || !game || game.over) return;
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  var t = e.target;
+  if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA')) return;
+  if (!e.key || e.key.length !== 1) return;
+  var b = norm(e.key);
+  if (/^[A-Z]$/.test(b)) guess(b);
+});
+})();
+</script>
+</body>
+</html>
